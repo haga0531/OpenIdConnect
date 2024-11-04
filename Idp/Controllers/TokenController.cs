@@ -24,6 +24,12 @@ public class TokenController(Context context) : Controller
         var authCode = context.AuthCodes.FirstOrDefault(x =>
             x.ClientId == request.ClientId && x.Code == request.Code && x.ExpiredAt > DateTimeOffset.Now);
 
+        // https://openid-foundation-japan.github.io/rfc6749.ja.html#code-authz-resp
+        if (authCode is not { UsedAt: null } || authCode.RedirectUri != request.RedirectUri)
+        {
+            return Unauthorized(new { error = "invalid_grant" });
+        }
+
         authCode!.UsedAt = DateTimeOffset.Now;
         authCode.Save(context.AuthCodes);
 
