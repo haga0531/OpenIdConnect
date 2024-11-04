@@ -36,6 +36,12 @@ public class TokenController(Context context) : Controller
         var accessToken = AccessToken.Build(authCode.UserId);
         accessToken.Save(context.AccessTokens);
 
+        var client = context.Clients.FirstOrDefault(x => x.ClientId == request.ClientId);
+        if (string.IsNullOrWhiteSpace(client?.ClientSecret) || client.ClientSecret != request.ClientSecret)
+        {
+            return Unauthorized(new { error = "invalid_client" });
+        }
+
         var response = new TokenResponse
         {
             IdToken = "dummy-id-token",

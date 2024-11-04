@@ -7,4 +7,6 @@ public class Context
     public List<AuthCode> AuthCodes { get; set; } = new();
 
     public List<AccessToken> AccessTokens { get; set; } = new();
+
+    public List<Client> Clients { get; set; } = new();
 }

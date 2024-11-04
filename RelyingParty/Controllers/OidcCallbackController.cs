@@ -41,7 +41,8 @@ public class OidcCallbackController(IHttpClientFactory httpClientFactory) : Cont
                 new KeyValuePair<string, string>("redirect_uri", RedirectUri),
                 new KeyValuePair<string, string>("scope", scope),
                 new KeyValuePair<string, string>("grant_type", GrantType),
-                new KeyValuePair<string, string>("client_id", ClientId)
+                new KeyValuePair<string, string>("client_id", ClientId),
+                new KeyValuePair<string, string>("client_secret", "c1!3n753cr37")
             }
         );
 

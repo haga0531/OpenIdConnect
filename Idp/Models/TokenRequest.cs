@@ -15,6 +15,10 @@ public class TokenRequest : IValidatableObject
     public string ClientId { get; set; } = null!;
 
     [Required]
+    [FromForm(Name = "client_secret")]
+    public string ClientSecret { get; set; } = null!;
+
+    [Required]
     [FromForm(Name = "code")]
     public string Code { get; set; } = null!;
 

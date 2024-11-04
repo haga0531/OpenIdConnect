@@ -12,7 +12,11 @@ var context = new Context
         new(1, "tiny-idp@example.com", "aaaa", "tiny-client")
     },
     AuthCodes = new List<AuthCode>(),
-    AccessTokens = new List<AccessToken>()
+    AccessTokens = new List<AccessToken>(),
+    Clients = new List<Client>
+    {
+        new("tiny-client", "c1!3n753cr37")
+    }
 };
 
 builder.Services.AddSingleton(context);
