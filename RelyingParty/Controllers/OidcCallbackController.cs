@@ -14,7 +14,7 @@ public class OidcCallbackController(IHttpClientFactory httpClientFactory) : Cont
 
     private const string GrantType = "authorization_code";
 
-    [HttpGet]
+    [HttpGet("oidc/callback")]
     public async Task<IActionResult> Index([FromQuery] OidcCallbackRequest request)
     {
         var token = await GetTokenAsync(request.Code, request.Scope);
