@@ -1,4 +1,5 @@
-﻿using Idp.Models;
+﻿using System.ComponentModel.DataAnnotations;
+using Idp.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Idp.Controllers;
@@ -9,6 +10,17 @@ public class TokenController(Context context) : Controller
     [HttpPost("token")]
     public IActionResult PostToken([FromForm] TokenRequest request)
     {
+        var validationResults = request.Validate(new ValidationContext(request)).ToList();
+        if (validationResults.Count > 0)
+        {
+            var error = new TokenErrorResponse
+            {
+                Error = Enum.Parse<TokenError>(validationResults.First().ErrorMessage!)
+            };
+
+            return BadRequest(error);
+        }
+
         var authCode = context.AuthCodes.FirstOrDefault(x =>
             x.ClientId == request.ClientId && x.Code == request.Code && x.ExpiredAt > DateTimeOffset.Now);
 

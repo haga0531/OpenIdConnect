@@ -29,7 +29,7 @@ public class OidcCallbackController(IHttpClientFactory httpClientFactory) : Cont
             });
         }
 
-        return StatusCode(500, new { error = "Access Token Error" });
+        return View("Error");
     }
 
     private async Task<OidcCallbackViewModel?> GetTokenAsync(string code, string scope)
@@ -46,7 +46,12 @@ public class OidcCallbackController(IHttpClientFactory httpClientFactory) : Cont
         );
 
         var response = await client.PostAsync(TokenEndpoint, content);
-        if (!response.IsSuccessStatusCode) return null;
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            ViewData["ErrorMessage"] = $"Failed to exchange code for token. Status code: {response.StatusCode}, Error: {errorContent}";
+            return null;
+        }
 
         var responseContent = await response.Content.ReadAsStringAsync();
         return JsonConvert.DeserializeObject<OidcCallbackViewModel>(responseContent);
