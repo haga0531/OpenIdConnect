@@ -9,7 +9,7 @@ var context = new Context
 {
     Users = new List<User>
     {
-        new(1, "tiny-idp@example.com", "password", "tiny-client")
+        new(1, "tiny-idp@example.com", "aaaa", "tiny-client")
     },
     AuthCodes = new List<AuthCode>(),
     AccessTokens = new List<AccessToken>()
