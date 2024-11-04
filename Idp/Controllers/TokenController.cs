@@ -15,10 +15,13 @@ public class TokenController(Context context) : Controller
         authCode!.UsedAt = DateTimeOffset.Now;
         authCode.Save(context.AuthCodes);
 
+        var accessToken = AccessToken.Build(authCode.UserId);
+        accessToken.Save(context.AccessTokens);
+
         var response = new TokenResponse
         {
             IdToken = "dummy-id-token",
-            AccessToken = "dummy-access-token",
+            AccessToken = accessToken.Token,
             TokenType = "Bearer",
             ExpiresIn = 86400
         };

@@ -11,7 +11,8 @@ var context = new Context
     {
         new(1, "tiny-idp@example.com", "password", "tiny-client")
     },
-    AuthCodes = new List<AuthCode>()
+    AuthCodes = new List<AuthCode>(),
+    AccessTokens = new List<AccessToken>()
 };
 
 builder.Services.AddSingleton(context);
