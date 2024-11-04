@@ -1,0 +1,21 @@
+﻿@model Idp.Models.AuthViewModel
+
+<div>
+    <h1>tiny-idp Login</h1>
+</div>
+<form
+    action="http://localhost:3000/login?client_id={@Model.ClientId}&redirect_uri={@Model.RedirectUri}&scope={@Model.Scope}"
+    method="post"
+>
+    <div>
+        <label for="email">Email</label>
+        <input email="email" type="text" name="email" />
+    </div>
+    <div>
+        <label for="password">Password</label>
+        <input id="password" type="password" name="password" />
+    </div>
+    <div>
+        <input name="login" type="submit" />
+    </div>
+</form>
