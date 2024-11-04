@@ -1,32 +1,28 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using RelyingParty.Models;
 
-namespace RelyingParty.Controllers
+namespace RelyingParty.Controllers;
+
+public class HomeController : Controller
 {
-    public class HomeController : Controller
+    private const string ClientId = "tiny-client";
+
+    private const string ResponseType = "code";
+
+    private const string Scope = "openid";
+
+    private const string RedirectUri = "http://localhost:4000/oidc/callback";
+
+    private const string AuthorizationEndpoint = "http://localhost:3000/openid-connect/auth";
+
+    public IActionResult Index()
     {
-        private readonly ILogger<HomeController> _logger;
+        const string authorizationUri = $"{AuthorizationEndpoint}" +
+                                        $"?client_id={ClientId}" +
+                                        $"&response_type={ResponseType}" +
+                                        $"&scope={Scope}" +
+                                        $"&redirect_uri={RedirectUri}";
 
-        public HomeController(ILogger<HomeController> logger)
-        {
-            _logger = logger;
-        }
-
-        public IActionResult Index()
-        {
-            return View();
-        }
-
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
+        ViewData["AuthorizationUri"] = authorizationUri;
+        return View();
     }
 }
