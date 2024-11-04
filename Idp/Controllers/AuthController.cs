@@ -1,4 +1,6 @@
-﻿using Idp.Models;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Web;
+using Idp.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Idp.Controllers;
@@ -11,6 +13,32 @@ public class AuthController : Controller
     {
         try
         {
+            if (!ModelState.IsValid)
+            {
+                var validResults = request.Validate(new ValidationContext(request));
+                foreach (var result in validResults)
+                {
+                    var target = result.MemberNames.Contains("RedirectUri")
+                        ? ErrorTarget.RedirectUri
+                        : ErrorTarget.ResourceOwner;
+
+                    var errorResponse = new AuthErrorResponse
+                    {
+                        Error = Enum.Parse<AuthCodeError>(result.ErrorMessage),
+                        ErrorDescription = result.ErrorMessage,
+                    };
+
+                    if (target == ErrorTarget.RedirectUri)
+                    {
+                        var redirectUrl =
+                            $"{request.RedirectUri}?{HttpUtility.UrlEncode(errorResponse.Error.ToString())}={HttpUtility.UrlEncode(errorResponse.ErrorDescription)}";
+                        return Redirect(redirectUrl);
+                    }
+
+                    return StatusCode(400);
+                }
+            }
+
             return View(new AuthViewModel
             {
                 ClientId = request.ClientId,
