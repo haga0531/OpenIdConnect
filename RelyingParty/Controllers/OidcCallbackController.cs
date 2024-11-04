@@ -20,14 +20,19 @@ public class OidcCallbackController(IHttpClientFactory httpClientFactory) : Cont
         var token = await GetTokenAsync(request.Code, request.Scope);
         if (token != null)
         {
-            return Ok();
+            return View(new OidcCallbackViewModel
+            {
+                AccessToken = token.AccessToken,
+                IdToken = token.IdToken,
+                TokenType = token.TokenType,
+                ExpiresIn = token.ExpiresIn
+            });
         }
 
         return StatusCode(500, new { error = "Access Token Error" });
     }
 
-    // TODO: Create ViewModel
-    private async Task<object?> GetTokenAsync(string code, string scope)
+    private async Task<OidcCallbackViewModel?> GetTokenAsync(string code, string scope)
     {
         var client = httpClientFactory.CreateClient();
         var content = new FormUrlEncodedContent(new[]
@@ -44,7 +49,6 @@ public class OidcCallbackController(IHttpClientFactory httpClientFactory) : Cont
         if (!response.IsSuccessStatusCode) return null;
 
         var responseContent = await response.Content.ReadAsStringAsync();
-        return JsonConvert.DeserializeObject(responseContent);
-
+        return JsonConvert.DeserializeObject<OidcCallbackViewModel>(responseContent);
     }
 }
