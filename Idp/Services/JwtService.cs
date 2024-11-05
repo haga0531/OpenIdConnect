@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Security.Cryptography;
+using System.Text;
 using Idp.Models;
 using Newtonsoft.Json;
 
@@ -8,19 +9,27 @@ public class JwtService
 {
     private const int OneDay = 60 * 60 * 24;
 
+    private const string PrivateKeyPath = "./Keys/tiny_idp_private.pem";
+
     public string Generate(string iss, string aud, int expDuration = OneDay)
     {
         var encodedHeader = Base64UrlEncode(JsonConvert.SerializeObject(BuildHeader("2024-11-05")));
         var encodedPayload = Base64UrlEncode(JsonConvert.SerializeObject(BuildPayload(iss, aud, expDuration)));
-        var signTarget = $"{encodedHeader}.{encodedPayload}";
-        var signature = Sign(signTarget);
+        var signature = Sign($"{encodedHeader}.{encodedPayload}");
 
-        return $"{signTarget}.{Sign(signature)}";
+        return $"{encodedHeader}.{encodedPayload}.{signature}";
     }
 
     private static string Sign(string target)
     {
-        return "signature";
+        var primaryKey = File.ReadAllText(PrivateKeyPath);
+        using var rsa = RSA.Create();
+        rsa.ImportFromPem(primaryKey);
+
+        var bytes = Encoding.UTF8.GetBytes(target);
+        var signature = rsa.SignData(bytes, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+
+        return Base64UrlEncode(Convert.ToBase64String(signature));
     }
 
     private static JwtHeader BuildHeader(string kid)
