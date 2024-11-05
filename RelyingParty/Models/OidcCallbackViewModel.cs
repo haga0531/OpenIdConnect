@@ -15,4 +15,6 @@ public class OidcCallbackViewModel
 
     [JsonProperty("expiresIn")]
     public int ExpiresIn { get; set; }
+
+    public bool IsTokenVerified { get; set; }
 }

@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using RelyingParty.Models;
+using RelyingParty.Services;
 
 namespace RelyingParty.Controllers;
 
-public class OidcCallbackController(IHttpClientFactory httpClientFactory) : Controller
+public class OidcCallbackController(IHttpClientFactory httpClientFactory, TokenVerifierService tokenVerifierService) : Controller
 {
     private const string ClientId = "tiny-client";
 
@@ -18,18 +20,21 @@ public class OidcCallbackController(IHttpClientFactory httpClientFactory) : Cont
     public async Task<IActionResult> Index([FromQuery] OidcCallbackRequest request)
     {
         var token = await GetTokenAsync(request.Code, request.Scope);
-        if (token != null)
-        {
-            return View(new OidcCallbackViewModel
-            {
-                AccessToken = token.AccessToken,
-                IdToken = token.IdToken,
-                TokenType = token.TokenType,
-                ExpiresIn = token.ExpiresIn
-            });
-        }
 
-        return View("Error");
+        if (token == null) return View("Error");
+
+        var jwk = await GetJwkAsync();
+
+        var isTokenVerified = tokenVerifierService.VerifyToken(token.IdToken, jwk);
+
+        return View(new OidcCallbackViewModel
+        {
+            AccessToken = token.AccessToken,
+            IdToken = token.IdToken,
+            TokenType = token.TokenType,
+            ExpiresIn = token.ExpiresIn,
+            IsTokenVerified = isTokenVerified
+        });
     }
 
     private async Task<OidcCallbackViewModel?> GetTokenAsync(string code, string scope)
@@ -56,5 +61,20 @@ public class OidcCallbackController(IHttpClientFactory httpClientFactory) : Cont
 
         var responseContent = await response.Content.ReadAsStringAsync();
         return JsonConvert.DeserializeObject<OidcCallbackViewModel>(responseContent);
+    }
+
+    private async Task<string> GetJwkAsync()
+    {
+        var jwksResponse = await httpClientFactory.CreateClient().GetStringAsync("http://localhost:3000/openid-connect/jwks");
+
+        var jwksData = JObject.Parse(jwksResponse);
+        var jwk = jwksData["keys"]?.FirstOrDefault(x =>
+                x["kty"]?.ToString() == "RSA" &&
+                x["alg"]?.ToString() == "RS256" &&
+                x["use"]?.ToString() == "sig")
+            ?.ToString();
+        if (jwk == null) throw new Exception("Failed to find JWK.");
+
+        return jwk;
     }
 }

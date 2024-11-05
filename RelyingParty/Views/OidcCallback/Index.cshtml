@@ -1,8 +1,18 @@
 ﻿@model OidcCallbackViewModel
 
-<div class="text-center">
+<div style="text-align:center;">
     <div>id_token: @Model.IdToken</div>
     <div>access_token: @Model.AccessToken</div>
     <div>token_type: @Model.TokenType</div>
     <div>expires_in: @Model.ExpiresIn</div>
+    
+    @switch (Model.IsTokenVerified)
+    {
+        case true:
+            <p style="color: green;">トークン検証成功</p>
+            break;
+        case false:
+            <p style="color: red;">トークン検証失敗</p>
+            break;
+    }
 </div>
