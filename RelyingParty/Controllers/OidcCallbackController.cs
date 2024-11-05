@@ -65,7 +65,11 @@ public class OidcCallbackController(IHttpClientFactory httpClientFactory, TokenV
 
     private async Task<string> GetJwkAsync()
     {
-        var jwksResponse = await httpClientFactory.CreateClient().GetStringAsync("http://localhost:3000/openid-connect/jwks");
+        var configuration = await GetConfiguration();
+        var jwksUri = configuration["jwks_uri"]?.ToString();
+        if (jwksUri == null) throw new Exception("Failed to find JWKS URI.");
+
+        var jwksResponse = await httpClientFactory.CreateClient().GetStringAsync(jwksUri);
 
         var jwksData = JObject.Parse(jwksResponse);
         var jwk = jwksData["keys"]?.FirstOrDefault(x =>
@@ -76,5 +80,13 @@ public class OidcCallbackController(IHttpClientFactory httpClientFactory, TokenV
         if (jwk == null) throw new Exception("Failed to find JWK.");
 
         return jwk;
+    }
+
+    private async Task<JObject> GetConfiguration()
+    {
+        var configurationResponse = await httpClientFactory.CreateClient().GetStringAsync($"http://localhost:3000/openid-connect/.well-known/openid-configuration");
+        var configuration = JObject.Parse(configurationResponse);
+
+        return configuration;
     }
 }
