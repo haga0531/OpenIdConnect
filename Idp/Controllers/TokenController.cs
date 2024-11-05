@@ -1,11 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Idp.Models;
+using Idp.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Idp.Controllers;
 
 [Route("openid-connect")]
-public class TokenController(Context context) : Controller
+public class TokenController(Context context, JwtService jwtService) : Controller
 {
     [HttpPost("token")]
     public IActionResult PostToken([FromForm] TokenRequest request)
@@ -42,9 +43,11 @@ public class TokenController(Context context) : Controller
             return Unauthorized(new { error = "invalid_client" });
         }
 
+        var jwt = jwtService.Generate("http://localhost:3000", "tiny-client");
+
         var response = new TokenResponse
         {
-            IdToken = "dummy-id-token",
+            IdToken = jwt,
             AccessToken = accessToken.Token,
             TokenType = "Bearer",
             ExpiresIn = 86400

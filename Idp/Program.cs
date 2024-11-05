@@ -1,4 +1,5 @@
 using Idp.Models;
+using Idp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +21,8 @@ var context = new Context
 };
 
 builder.Services.AddSingleton(context);
+
+builder.Services.AddSingleton<JwtService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
