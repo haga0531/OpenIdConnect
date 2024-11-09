@@ -18,6 +18,8 @@ public class AuthRequest : IValidatableObject
 
     [FromQuery(Name = "scope")] public string? Scope { get; set; }
 
+    [FromQuery(Name = "state")] public string? State { get; set; }
+
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
@@ -33,6 +35,12 @@ public class AuthRequest : IValidatableObject
         }
 
         if (string.IsNullOrWhiteSpace(ClientId) || !validClientIds.Contains(ClientId))
+        {
+            yield return new ValidationResult(AuthCodeError.InvalidRequest.ToString(),
+                new[] { ErrorTarget.ResourceOwner.ToString() });
+        }
+
+        if (string.IsNullOrWhiteSpace(State))
         {
             yield return new ValidationResult(AuthCodeError.InvalidRequest.ToString(),
                 new[] { ErrorTarget.ResourceOwner.ToString() });

@@ -43,7 +43,8 @@ public class AuthController : Controller
             {
                 ClientId = request.ClientId,
                 RedirectUri = request.RedirectUri,
-                Scope = request.Scope
+                Scope = request.Scope,
+                State = request.State
             });
         }
         catch (Exception e)

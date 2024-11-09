@@ -19,6 +19,12 @@ public class OidcCallbackController(IHttpClientFactory httpClientFactory, TokenV
     [HttpGet("oidc/callback")]
     public async Task<IActionResult> Index([FromQuery] OidcCallbackRequest request)
     {
+        var storedState = HttpContext.Session.GetString("state");
+        if (storedState == null || storedState != request.State)
+        {
+            return StatusCode(400, new { error = "invalid state" });
+        }
+
         var token = await GetTokenAsync(request.Code, request.Scope);
 
         if (token == null) return View("Error");

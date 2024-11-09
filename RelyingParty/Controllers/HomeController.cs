@@ -16,11 +16,15 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
-        const string authorizationUri = $"{AuthorizationEndpoint}" +
+        var state = Guid.NewGuid().ToString("N");
+        HttpContext.Session.SetString("state", state);
+
+        var authorizationUri = $"{AuthorizationEndpoint}" +
                                         $"?client_id={ClientId}" +
                                         $"&response_type={ResponseType}" +
                                         $"&scope={Scope}" +
-                                        $"&redirect_uri={RedirectUri}";
+                                        $"&redirect_uri={RedirectUri}" +
+                                        $"&state={state}";
 
         ViewData["AuthorizationUri"] = authorizationUri;
         return View();
