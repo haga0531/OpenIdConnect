@@ -9,4 +9,6 @@ public class AuthViewModel
     public string Scope { get; set; } = null!;
 
     public string State { get; set; } = null!;
+
+    public string Nonce { get; set; } = null!;
 }

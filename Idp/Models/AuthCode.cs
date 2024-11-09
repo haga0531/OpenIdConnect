@@ -1,6 +1,6 @@
 ﻿namespace Idp.Models;
 
-public class AuthCode(string code, int userId, string clientId, string redirectUri, DateTimeOffset expiredAt)
+public class AuthCode(string code, int userId, string clientId, string redirectUri, DateTimeOffset expiredAt, string nonce = null!)
 {
     public string Code { get; set; } = code;
 
@@ -14,12 +14,14 @@ public class AuthCode(string code, int userId, string clientId, string redirectU
 
     public DateTimeOffset? UsedAt { get; set; }
 
-    public static AuthCode Build(int userId, string clientId, string redirectUri)
+    public string? Nonce { get; set; } = nonce;
+
+    public static AuthCode Build(int userId, string clientId, string redirectUri, string nonce)
     {
         var code = Guid.NewGuid().ToString("N")[..8];
         var expiredAt = DateTime.Now.AddMinutes(1);
 
-        return new AuthCode(code, userId, clientId, redirectUri, expiredAt);
+        return new AuthCode(code, userId, clientId, redirectUri, expiredAt, nonce);
     }
 
     public void Save(List<AuthCode> db)

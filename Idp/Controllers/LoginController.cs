@@ -14,7 +14,8 @@ public class LoginController(Context context) : Controller
         [FromQuery(Name = "client_id")] string clientId,
         [FromQuery(Name = "redirect_uri")] string redirectUri,
         [FromQuery(Name = "scope")] string scope,
-        [FromQuery(Name = "state")] string state)
+        [FromQuery(Name = "state")] string state,
+        [FromQuery(Name = "nonce")] string nonce)
     {
         if (!Models.User.Login(context.Users, email, password))
         {
@@ -22,7 +23,7 @@ public class LoginController(Context context) : Controller
         }
 
         var user = Models.User.FindByEmail(context.Users, email);
-        var authCode = AuthCode.Build(user.Id, clientId, redirectUri);
+        var authCode = AuthCode.Build(user.Id, clientId, redirectUri, nonce);
         authCode.Save(context.AuthCodes);
 
         var redirectUrl = $"{redirectUri}?code={authCode.Code}&iss={Issuer}&scope={scope}&state={state}";

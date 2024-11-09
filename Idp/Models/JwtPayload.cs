@@ -11,4 +11,6 @@ public class JwtPayload
     public long Exp { get; set; }
 
     public long Iat { get; set; }
+
+    public string Nonce { get; set; } = null!;
 }

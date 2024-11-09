@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Text;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RelyingParty.Models;
@@ -32,6 +33,14 @@ public class OidcCallbackController(IHttpClientFactory httpClientFactory, TokenV
         var jwk = await GetJwkAsync();
 
         var isTokenVerified = tokenVerifierService.VerifyToken(token.IdToken, jwk);
+
+        var idTokenPayload = DecodeTokenPayload(token.IdToken);
+        var storedNonce = HttpContext.Session.GetString("nonce");
+        if (string.IsNullOrEmpty(storedNonce) || idTokenPayload["Nonce"].ToString() != storedNonce)
+        {
+            ViewData["ErrorMessage"] = "Invalid nonce in ID Token.";
+            return View("Error");
+        }
 
         return View(new OidcCallbackViewModel
         {
@@ -90,9 +99,35 @@ public class OidcCallbackController(IHttpClientFactory httpClientFactory, TokenV
 
     private async Task<JObject> GetConfiguration()
     {
-        var configurationResponse = await httpClientFactory.CreateClient().GetStringAsync($"http://localhost:3000/openid-connect/.well-known/openid-configuration");
+        var configurationResponse = await httpClientFactory.CreateClient()
+            .GetStringAsync("http://localhost:3000/openid-connect/.well-known/openid-configuration");
         var configuration = JObject.Parse(configurationResponse);
 
         return configuration;
+    }
+
+    private static IDictionary<string, object> DecodeTokenPayload(string idToken)
+    {
+        var parts = idToken.Split('.');
+        if (parts.Length < 2)
+        {
+            throw new ArgumentException("Invalid JWT format");
+        }
+
+        var payload = Base64UrlDecode(parts[1]);
+        return JsonConvert.DeserializeObject<Dictionary<string, object>>(payload);
+    }
+
+    private static string Base64UrlDecode(string base64Url)
+    {
+        var base64 = base64Url.Replace('-', '+').Replace('_', '/');
+        switch (base64.Length % 4)
+        {
+            case 2: base64 += "=="; break;
+            case 3: base64 += "="; break;
+        }
+
+        var byteArray = Convert.FromBase64String(base64);
+        return Encoding.UTF8.GetString(byteArray);
     }
 }

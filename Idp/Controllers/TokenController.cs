@@ -31,7 +31,7 @@ public class TokenController(Context context, JwtService jwtService) : Controlle
             return Unauthorized(new { error = "invalid_grant" });
         }
 
-        authCode!.UsedAt = DateTimeOffset.Now;
+        authCode.UsedAt = DateTimeOffset.Now;
         authCode.Save(context.AuthCodes);
 
         var accessToken = AccessToken.Build(authCode.UserId);
@@ -43,7 +43,7 @@ public class TokenController(Context context, JwtService jwtService) : Controlle
             return Unauthorized(new { error = "invalid_client" });
         }
 
-        var jwt = jwtService.Generate("http://localhost:3000", "tiny-client");
+        var jwt = jwtService.Generate("http://localhost:3000", "tiny-client", authCode.Nonce!);
 
         var response = new TokenResponse
         {

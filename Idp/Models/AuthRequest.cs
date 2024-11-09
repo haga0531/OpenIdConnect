@@ -20,6 +20,7 @@ public class AuthRequest : IValidatableObject
 
     [FromQuery(Name = "state")] public string? State { get; set; }
 
+    [FromQuery(Name = "nonce")] public string? Nonce { get; set; }
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
@@ -40,7 +41,7 @@ public class AuthRequest : IValidatableObject
                 new[] { ErrorTarget.ResourceOwner.ToString() });
         }
 
-        if (string.IsNullOrWhiteSpace(State))
+        if (string.IsNullOrWhiteSpace(State) || string.IsNullOrWhiteSpace(Nonce))
         {
             yield return new ValidationResult(AuthCodeError.InvalidRequest.ToString(),
                 new[] { ErrorTarget.ResourceOwner.ToString() });

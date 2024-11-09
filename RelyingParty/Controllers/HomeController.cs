@@ -17,14 +17,17 @@ public class HomeController : Controller
     public IActionResult Index()
     {
         var state = Guid.NewGuid().ToString("N");
+        var nonce = Guid.NewGuid().ToString("N");
         HttpContext.Session.SetString("state", state);
+        HttpContext.Session.SetString("nonce", nonce);
 
         var authorizationUri = $"{AuthorizationEndpoint}" +
-                                        $"?client_id={ClientId}" +
-                                        $"&response_type={ResponseType}" +
-                                        $"&scope={Scope}" +
-                                        $"&redirect_uri={RedirectUri}" +
-                                        $"&state={state}";
+                               $"?client_id={ClientId}" +
+                               $"&response_type={ResponseType}" +
+                               $"&scope={Scope}" +
+                               $"&redirect_uri={RedirectUri}" +
+                               $"&state={state}" +
+                               $"&nonce={nonce}";
 
         ViewData["AuthorizationUri"] = authorizationUri;
         return View();

@@ -4,7 +4,7 @@
     <h1>tiny-idp Login</h1>
 </div>
 <form
-    action="/login?client_id=@Model.ClientId&redirect_uri=@Model.RedirectUri&scope=@Model.Scope&state=@Model.State"
+    action="/login?client_id=@Model.ClientId&redirect_uri=@Model.RedirectUri&scope=@Model.Scope&state=@Model.State&nonce=@Model.Nonce"
     method="post"
 >
     <div>

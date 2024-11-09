@@ -11,10 +11,10 @@ public class JwtService
 
     private const string PrivateKeyPath = "./Keys/tiny_idp_private.pem";
 
-    public string Generate(string iss, string aud, int expDuration = OneDay)
+    public string Generate(string iss, string aud, string nonce, int expDuration = OneDay)
     {
         var encodedHeader = Base64UrlEncode(JsonConvert.SerializeObject(BuildHeader("2024-11-05")));
-        var encodedPayload = Base64UrlEncode(JsonConvert.SerializeObject(BuildPayload(iss, aud, expDuration)));
+        var encodedPayload = Base64UrlEncode(JsonConvert.SerializeObject(BuildPayload(iss, aud, nonce, expDuration)));
         var signature = Sign($"{encodedHeader}.{encodedPayload}");
 
         return $"{encodedHeader}.{encodedPayload}.{signature}";
@@ -42,7 +42,7 @@ public class JwtService
         };
     }
 
-    private static JwtPayload BuildPayload(string iss, string aud, int expDuration = OneDay)
+    private static JwtPayload BuildPayload(string iss, string aud, string nonce, int expDuration = OneDay)
     {
         var sub = Guid.NewGuid().ToString("N");
         var iat = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
@@ -54,7 +54,8 @@ public class JwtService
             Sub = sub,
             Aud = aud,
             Exp = exp,
-            Iat = iat
+            Iat = iat,
+            Nonce = nonce
         };
     }
 
